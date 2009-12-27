@@ -6,13 +6,21 @@ namespace MatchServer.Packet
     {
         public static UInt16 CalculateChecksum(byte[] buf, int index, int length)
         {
-            UInt32 sum1 = (UInt32)buf[index] + buf[index + 1] + buf[index + 2] + buf[index + 3];
-            UInt32 sum2 = 0;
-            for (int x = 6; x < length; ++x) sum2 += buf[index + x];
-            UInt32 sum3 = sum2 - sum1;
-            UInt32 sum4 = sum3 >> 0x10;
-            sum3 += sum4;
-            return (UInt16)sum3;
+			UInt32[] intermediateValues = new UInt32[4]
+			{
+				0, 0, 0, 0
+			};
+
+			for (int i = 0; i < 4; ++i)
+				intermediateValues[0] += buf[index + i];
+
+            for (int i = 6; i < length; ++i)
+				intermediateValues[1] += buf[index + i];
+
+			intermediateValues[2] = intermediateValues[1] - intermediateValues[0];
+			intermediateValues[3] = intermediateValues[2] >> 0x10;
+
+			return (UInt16)(intermediateValues[2] + intermediateValues[3]);
         }
 
         public static void Decrypt(byte[] buf, int index, int length, byte[] Key)
