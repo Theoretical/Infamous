@@ -45,15 +45,21 @@ namespace MatchServer.Core
             try
             {
                 Array.Clear(mBuffer, 0, 4096);
-                mSocket.BeginReceive(mBuffer, 0, 4096, SocketFlags.None, new AsyncCallback(HandleReceive), null
+                mSocket.BeginReceive(mBuffer, 0, 4096, SocketFlags.None, new AsyncCallback(HandleReceive), null);
+            }
+            catch 
+            {
+                Log.Write("Error: Processing pack | Initializing Receieve.");
             }
         }
-        public Client(Socket s, UInt64 p)
+        public Client(Socket pSocket, UInt64 pSession)
         {
-            string ip = ((System.Net.IPEndPoint)s.RemoteEndPoint).Address.ToString();
-            Log.Write("Client connected: {0}", ip);
+            mClientIP = ((System.Net.IPEndPoint)pSocket.RemoteEndPoint).Address.ToString();   
+            mSocket = pSocket;
+            mClientUID = pSession;
+            Log.Write("{0} Client connected", mClientIP);
 
-            mSocket.BeginReceive(mBuffer, 0, 4096, SocketFlags.None, new AsyncCallback(HandleReceive), null
+            mSocket.BeginReceive(mBuffer, 0, 4096, SocketFlags.None, new AsyncCallback(HandleReceive), null);
         }
     }
 }
