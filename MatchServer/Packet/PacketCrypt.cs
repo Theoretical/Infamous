@@ -24,7 +24,7 @@ namespace MatchServer.Packet
         {
             for (int i = 0; i < length; ++i)
             {
-                byte a = (byte)(buf[index + i]);
+                byte a = buf[index + i];
                 a ^= 0x0F0;
                 byte b = (byte)(a & 0x1f);
                 a >>= 5;
@@ -47,7 +47,6 @@ namespace MatchServer.Packet
                 b |= (byte)(a & 0xFF);
                 b ^= 0xF0;
                 buf[index + i] = (byte)b;
-
             }
         }
     }
