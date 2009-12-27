@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading;
 using System.Net.Sockets;
 
 using MatchServer.Network;
@@ -14,6 +14,7 @@ namespace MatchServer.Core
         private string mClientIP = String.Empty;
         private byte[] mStream = new byte[0];
         private byte[] mBuffer = new byte[4096];
+        Queue<PacketReader> mPacketQueue = new Queue<PacketReader>();
 
         public void Disconnect()
         {
@@ -61,6 +62,11 @@ namespace MatchServer.Core
             {
                 Log.Write("Error: Processing pack | Initializing Receieve.");
             }
+        }
+
+        private void ProcessStream()
+        {
+
         }
         public Client(Socket pSocket, UInt64 pSession)
         {
