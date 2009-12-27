@@ -46,8 +46,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Client.cs" />
+    <Compile Include="Core\Database.cs" />
     <Compile Include="Core\Log.cs" />
     <Compile Include="Core\Program.cs" />
+    <Compile Include="Core\Structures.cs" />
     <Compile Include="Network\TCPServer.cs" />
     <Compile Include="Packet\HandlerDelegate.cs" />
     <Compile Include="Packet\Handle\Match.cs" />
