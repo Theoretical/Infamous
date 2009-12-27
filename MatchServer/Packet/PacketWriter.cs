@@ -31,7 +31,7 @@ namespace MatchServer.Packet
         public void Write(string pString, int pLength)
         {
             if (pString == null) pString = "";
-            if (pString.Length < pLength)
+            if (pString.Length > pLength)
                 throw new Exception("Could not write string.");
 
             byte[] buf = new byte[pLength];
