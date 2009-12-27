@@ -6,10 +6,7 @@ namespace MatchServer.Packet
     {
         public static UInt16 CalculateChecksum(byte[] buf, int index, int length)
         {
-			UInt32[] intermediateValues = new UInt32[4]
-			{
-				0, 0, 0, 0
-			};
+            UInt32[] intermediateValues = new UInt32[4];
 
 			for (int i = 0; i < 4; ++i)
 				intermediateValues[0] += buf[index + i];
