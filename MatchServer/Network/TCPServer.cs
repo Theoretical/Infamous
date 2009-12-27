@@ -12,6 +12,11 @@ namespace MatchServer.Network
         private static UInt64 mSessions = 0;
         private static Socket mListener;
 
+        public static void Remove(Client pClient)
+        {
+            lock (mClients)
+                mClients.Remove(pClient);
+        }
         private static void HandleAccept(IAsyncResult pResult)
         {
             try

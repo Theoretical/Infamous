@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 
+using MatchServer.Network;
+using MatchServer.Packet;
 namespace MatchServer.Core
 {
     class Client
@@ -12,6 +14,14 @@ namespace MatchServer.Core
         private string mClientIP = String.Empty;
         private byte[] mStream = new byte[0];
         private byte[] mBuffer = new byte[4096];
+
+        public void Disconnect()
+        {
+            if (mSocket.Connected)
+                mSocket.Close();
+
+            TCPServer.Remove(this);
+        }
 
         private void HandleReceive(IAsyncResult pResult)
         {
