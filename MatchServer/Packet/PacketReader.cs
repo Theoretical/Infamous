@@ -21,8 +21,13 @@ namespace MatchServer.Packet
 
         public override string ReadString()
         {
-            ReadUInt16();
-            return base.ReadString();
+            var len = ReadUInt16();
+            if (len < 1)
+                return String.Empty;
+            
+            var buffer = new byte[len];
+            buffer = this.ReadBytes(len);
+            return Encoding.GetEncoding(1252).GetString(buffer);
         }
     }
 }
