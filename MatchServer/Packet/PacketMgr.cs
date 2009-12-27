@@ -12,7 +12,7 @@ namespace MatchServer.Packet
         public PacketHandlerAttribute(Operation pOpcode, PacketFlags pFlags)
         {
             Opcode = pOpcode;
-            pFlags = flags;
+            flags = pFlags;
         }
         public Operation Opcode
         {
