@@ -10,11 +10,11 @@ namespace MatchServer.Packet
         public CryptFlags Flags { get; internal set; }
         public UInt16 Operation { get; internal set; }
         
-        public PacketWriter(UInt16 operation, CryptFlags flag)
+        public PacketWriter(Operation operation, CryptFlags flag)
             : base(new MemoryStream(4096))
         {
             Flags = flag;
-            Operation = operation;
+            Operation = (UInt16)operation;
 
             this.Write((UInt16)operation);
             this.Write((byte)0);
@@ -23,7 +23,9 @@ namespace MatchServer.Packet
         {
             if (value == null) value = "";
             Write((UInt16)(value.Length+2));
-            base.Write(value);
+            var buf = new byte[value.Length+2];
+            Encoding.GetEncoding(1252).GetBytes(value, 0, value.Length, buf, 0);
+            base.Write(buf);
         }
 
         public void Write(string pString, int pLength)
@@ -62,7 +64,7 @@ namespace MatchServer.Packet
             Buffer.BlockCopy(BitConverter.GetBytes((UInt16)Flags), 0, buffer, 0, 2);
             Buffer.BlockCopy(BitConverter.GetBytes((UInt16)totalSize), 0, buffer, 2, 2);
             Buffer.BlockCopy(BitConverter.GetBytes((UInt16)0), 0, buffer, 4, 2);
-            Buffer.BlockCopy(BitConverter.GetBytes((UInt16)(totalSize - 6)), 0, buffer, 6, 0);
+            Buffer.BlockCopy(BitConverter.GetBytes((UInt16)(totalSize - 6)), 0, buffer, 6, 2);
             buffer[10] = pCount;
 
             if (Flags == CryptFlags.Encrypt)
