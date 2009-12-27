@@ -9,15 +9,17 @@ namespace MatchServer.Core
 {
     class Client
     {
+             
         private Socket mSocket = null;
-        private UInt64 mClientUID = 0;
+        public UInt64 mClientUID = 0;
         private string mClientIP = String.Empty;
         private byte[] mStream = new byte[0];
         private byte[] mBuffer = new byte[4096];
         private byte[] mCrypt = new byte[32];
-        private byte mCounter = 1;
+        private byte mCounter = 0;
         private SocketAsyncEventArgs mArgs = new SocketAsyncEventArgs();
-        Queue<PacketReader> mPacketQueue = new Queue<PacketReader>();
+        private Queue<PacketReader> mPacketQueue = new Queue<PacketReader>();
+        public MMatchAccountInfo mAccount = new MMatchAccountInfo();
 
         public void Disconnect()
         {
@@ -27,7 +29,7 @@ namespace MatchServer.Core
             TCPServer.Remove(this);
         }
 
-        private void Send(PacketWriter pPacket)
+        public void Send(PacketWriter pPacket)
         {
             Send(pPacket.Process(++mCounter, mCrypt));
         }
@@ -83,6 +85,7 @@ namespace MatchServer.Core
             catch 
             {
                 Log.Write("Error: Processing pack | Initializing Receieve.");
+                Disconnect();
             }
         }
 
