@@ -52,7 +52,7 @@ namespace MatchServer.Packet
             this.Write(new byte[pCount]);
         }
 
-        public byte[] Process(byte[] bEncrypt)
+        public byte[] Process(byte pCount, byte[] bEncrypt)
         {
             var totalSize = (int)(this.BaseStream.Length + 8);
             var buffer = new byte[totalSize];
@@ -63,6 +63,7 @@ namespace MatchServer.Packet
             Buffer.BlockCopy(BitConverter.GetBytes((UInt16)totalSize), 0, buffer, 2, 2);
             Buffer.BlockCopy(BitConverter.GetBytes((UInt16)0), 0, buffer, 4, 2);
             Buffer.BlockCopy(BitConverter.GetBytes((UInt16)(totalSize - 6)), 0, buffer, 6, 0);
+            buffer[10] = pCount;
 
             if (Flags == CryptFlags.Encrypt)
             {
