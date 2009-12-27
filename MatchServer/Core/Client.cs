@@ -19,6 +19,7 @@ namespace MatchServer.Core
         private byte mCounter = 0;
         private SocketAsyncEventArgs mArgs = new SocketAsyncEventArgs();
         private Queue<PacketReader> mPacketQueue = new Queue<PacketReader>();
+        public PacketFlags mClientFlags = PacketFlags.None;
         public MMatchAccountInfo mAccount = new MMatchAccountInfo();
 
         public void Disconnect()
@@ -31,7 +32,12 @@ namespace MatchServer.Core
 
         public void Send(PacketWriter pPacket)
         {
-            Send(pPacket.Process(++mCounter, mCrypt));
+            //Send(pPacket.Process(++mCounter, mCrypt));
+            var packet = pPacket.Process(++mCounter, mCrypt);
+            Send(packet);
+
+            PacketCrypt.Decrypt(packet, 6, packet.Length - 6, mCrypt);
+            Log.PacketLog(packet, 0, packet.Length);
         }
         private void Send(byte[] pBuffer)
         {
@@ -152,7 +158,8 @@ namespace MatchServer.Core
 
                 Log.Write("{0} Received: {1}", mClientIP, pReader.getOpcode());
                 if (PacketMgr.mOpcodes.TryGetValue(pReader.getOpcode(), out handler))
-                    handler.mProcessor(this, pReader);
+                    if (mClientFlags >= handler.mFlags) 
+                        handler.mProcessor(this, pReader);
             }
         }
 
