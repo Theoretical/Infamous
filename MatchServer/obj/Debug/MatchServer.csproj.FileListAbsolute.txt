@@ -1,0 +1,5 @@
+C:\Users\Jacob\Documents\Visual Studio 2008\Projects\MatchServer\MatchServer\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Jacob\Documents\Visual Studio 2008\Projects\MatchServer\MatchServer\bin\Debug\MatchServer.exe
+C:\Users\Jacob\Documents\Visual Studio 2008\Projects\MatchServer\MatchServer\bin\Debug\MatchServer.pdb
+C:\Users\Jacob\Documents\Visual Studio 2008\Projects\MatchServer\MatchServer\obj\Debug\MatchServer.exe
+C:\Users\Jacob\Documents\Visual Studio 2008\Projects\MatchServer\MatchServer\obj\Debug\MatchServer.pdb
