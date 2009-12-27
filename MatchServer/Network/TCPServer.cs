@@ -38,7 +38,7 @@ namespace MatchServer.Network
                 mListener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 mListener.Bind(new IPEndPoint(IPAddress.Any, 6000));
                 mListener.Listen(64);
-                mSessions = 0;
+                mSessions = 1;
                 mClients = new HashSet<Client>();
                 mListener.BeginAccept(new AsyncCallback(HandleAccept), null);
                 Log.Write("TCP Server Iniitialized.");
