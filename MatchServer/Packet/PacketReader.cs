@@ -27,7 +27,8 @@ namespace MatchServer.Packet
             
             var buffer = new byte[len];
             buffer = this.ReadBytes(len);
-            return Encoding.GetEncoding(1252).GetString(buffer);
+            var pString = Encoding.GetEncoding(1252).GetString(buffer);
+            return pString.Substring(0, pString.IndexOf('\0'));
         }
     }
 }
