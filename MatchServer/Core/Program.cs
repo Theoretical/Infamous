@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
 using System.Text;
 
 using MatchServer.Network;
@@ -10,10 +8,12 @@ namespace MatchServer.Core
 {
     class Program
     {
+        public static System.Text.RegularExpressions.Regex mRegex = new System.Text.RegularExpressions.Regex("[a-zA-Z0-9]{3,16}");
         static void Main(string[] args)
         {
             Console.WindowWidth = Console.BufferWidth = 120;
             Console.Title = "MatchServer";
+            Database.Initialize();
             PacketMgr.InitializeHandlers<Match>();
             TCPServer.Initialize();
 
