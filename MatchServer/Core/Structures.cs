@@ -118,7 +118,7 @@ namespace MatchServer.Core
         public Int32 nWeight = 0;
         public Int32 nMaxWT = 0;
     }
-    class MMatchWorldItem
+    class MMatchWorldItem   
     {
         public UInt16 nUID;
         public UInt16 nItemID;
