@@ -12,7 +12,7 @@ namespace MatchServer.Core
         static void Main(string[] args)
         {
             Console.WindowWidth = Console.BufferWidth = 120;
-            Console.Title = "MatchServer";
+            Console.Title = "Match Server";
             Database.Initialize();
             PacketMgr.InitializeHandlers<Match>();
             TCPServer.Initialize();
