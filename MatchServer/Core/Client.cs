@@ -20,7 +20,14 @@ namespace MatchServer.Core
         private SocketAsyncEventArgs mArgs = new SocketAsyncEventArgs();
         private Queue<PacketReader> mPacketQueue = new Queue<PacketReader>();
         public PacketFlags mClientFlags = PacketFlags.None;
+        
         public MMatchAccountInfo mAccount = new MMatchAccountInfo();
+        public MTD_CharInfo mCharacter = new MTD_CharInfo();
+        public MMatchChannel mChannel = null;
+        public MMatchStage mStage = null;
+        public MGame mGame = null;
+        public MMatchPlace mPlace = MMatchPlace.Outside;
+
 
         public void Disconnect()
         {
@@ -30,9 +37,14 @@ namespace MatchServer.Core
             TCPServer.Remove(this);
         }
 
+        public void UnloadCharacter()
+        {
+            mClientFlags = PacketFlags.Login;
+            mPlace = MMatchPlace.Outside;
+            mCharacter = new MTD_CharInfo();
+        }
         public void Send(PacketWriter pPacket)
         {
-            //Send(pPacket.Process(++mCounter, mCrypt));
             var packet = pPacket.Process(++mCounter, mCrypt);
             Send(packet);
 
