@@ -49,6 +49,37 @@ namespace MatchServer.Packet
             this.Write(pCount);
         }
 
+        public void Write(MTD_CharInfo CharInfo)
+        {
+            Write(1, 146);
+            Write(CharInfo.szName, 32);
+            Write(CharInfo.szClanName, 16);
+            Write((Int32)CharInfo.nClanGrade);
+            Write(CharInfo.nClanPoint);
+            Write(CharInfo.nCharNum);
+            Write(CharInfo.nLevel);
+            Write(CharInfo.nSex);
+            Write(CharInfo.nHair);
+            Write(CharInfo.nFace);
+            Write(CharInfo.nXP);
+            Write(CharInfo.nBP);
+            Write(CharInfo.fBonusRate);
+            Write(CharInfo.nPrize);
+            Write(CharInfo.nHP);
+            Write(CharInfo.nAP);
+            Write(CharInfo.nMaxWeight);
+            Write(CharInfo.nSafeFalls);
+            Write(CharInfo.nFR);
+            Write(CharInfo.nCR);
+            Write(CharInfo.nER);
+            Write(CharInfo.nWR);
+            for (int i = 0; i < 12; i++)
+                Write(CharInfo.nEquippedItems[i].nItemID);
+            Write((Int32)CharInfo.nUGradeID);
+            Write(CharInfo.nCLID);
+        }
+
+
         public void WriteSkip(int pCount)
         {
             this.Write(new byte[pCount]);

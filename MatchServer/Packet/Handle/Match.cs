@@ -71,5 +71,59 @@ namespace MatchServer.Packet.Handle
             Database.GetCharacterList(pClient.mAccount.nAID, pResponseChars);
             pClient.Send(pResponseChars);
         }
+
+        [PacketHandler(Operation.MatchRequestAccountCharInfo, PacketFlags.Login)]
+        public static void ProcessCharInfo(Client pClient, PacketReader pReader)
+        {
+            var index = pReader.ReadByte();
+
+            if (index < 0 || index > 4)
+            {
+                pClient.Disconnect();
+                return;
+            }
+
+            pClient.mCharacter.nCharNum = index;
+            Database.GetCharacter(pClient.mAccount.nAID, index, pClient.mCharacter);
+            pClient.mCharacter.nUGradeID = pClient.mAccount.nUGradeID;
+
+            PacketWriter pCharInfoResponse = new PacketWriter(Operation.MatchResponseAccountCharInfo, CryptFlags.Encrypt);
+            pCharInfoResponse.Write(index);
+            pCharInfoResponse.Write(pClient.mCharacter);
+            pClient.Send(pCharInfoResponse);
+        }
+
+        [PacketHandler(Operation.MatchRequestCreateChar, PacketFlags.Login)]
+        public static void ProcessCreateChar (Client pClient, PacketReader pPacket)
+        {
+            var uid = pPacket.ReadUInt64();
+            var index = pPacket.ReadInt32();
+            var name = pPacket.ReadString();
+            var sex = pPacket.ReadInt32();
+            var hair = pPacket.ReadInt32();
+            var face = pPacket.ReadInt32();
+            var costume = pPacket.ReadInt32();
+            var result = Results.Accepted;
+
+            if (uid != pClient.mClientUID || index < 0 || index > 4 || sex < 0 || sex > 1)
+            {
+                pClient.Disconnect();
+                return;
+            }
+
+            if (!Program.mRegex.IsMatch(name))
+                result = Results.CharacterEnterName;
+            else if (Database.GetQuery("SELECT COUNT(AID) FROM Character WHERE AID=" + pClient.mAccount.nAID) >= 4)
+                result = Results.CharacterInvalidName;
+            else if (Database.GetQuery("SELECT COUNT(Name) FROM Character WHERE Name='" + name + "'") > 0)
+                result = Results.CharacterNameInUse;
+            else if (!Database.CreateCharacter(pClient.mAccount.nAID, (byte)index, name, sex, hair, face, costume))
+                result = Results.CharacterInvalidName;
+
+            PacketWriter pResponseCreateChar = new PacketWriter(Operation.MatchResponseCreateChar, CryptFlags.Encrypt);
+            pResponseCreateChar.Write((Int32)result);
+            pResponseCreateChar.Write(name);
+            pClient.Send(pResponseCreateChar);
+        }
     }
 }
