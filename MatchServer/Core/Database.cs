@@ -44,8 +44,11 @@ namespace MatchServer.Core
                     {
                         while (sqlDR.Read())
                             for (int i = 0; i < sqlDR.FieldCount; ++i)
-                                pArray.Add(sqlDR[i]);
-                    }
+                                if (!sqlDR.IsDBNull(i))
+                                    pArray.Add(sqlDR[i]);
+                                else
+                                    pArray.Add(0);
+                    }   
                 }
             }
         }
