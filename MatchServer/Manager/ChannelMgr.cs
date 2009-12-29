@@ -30,7 +30,6 @@ namespace MatchServer.Manager
 
             foreach (Client c in pChannel.lClients)
             {
-                if (c == pClient) continue;
                 PlayerList(c);
             }
         }
@@ -39,10 +38,22 @@ namespace MatchServer.Manager
             if (pClient.mChannel == null)
                 return;
 
+            lock (pClient.mChannel.lClients)
+                pClient.mChannel.lClients.Remove(pClient);
+
             PacketWriter pChannelLeave = new PacketWriter(Operation.ChannelLeave, CryptFlags.Encrypt);
             pChannelLeave.Write(pClient.mClientUID);
             pChannelLeave.Write(pClient.mChannel.uidChannel);
             pClient.Send(pChannelLeave);
+
+            foreach (Client c in pClient.mChannel.lClients)
+                PlayerList(c);
+
+            if (pClient.mChannel.lClients.Count == 0 && (pClient.mChannel.nChannelType == MMatchChannelType.Private || pClient.mChannel.nChannelType == MMatchChannelType.Clan))
+                lock (Program.mChannels)
+                    Program.mChannels.Remove(pClient.mChannel);
+
+            pClient.mChannel = null;
         }
         public static void PlayerList (Client pClient)
         {
@@ -73,7 +84,6 @@ namespace MatchServer.Manager
             }
             pClient.Send(pResonsePlayerList);
         }
-
         public static void Chat (Client pClient, string pMessage)
         {
             PacketWriter pChannelChat = new PacketWriter(Operation.ChannelChat, CryptFlags.Encrypt);
