@@ -47,9 +47,6 @@ namespace MatchServer.Core
         {
             var packet = pPacket.Process(++mCounter, mCrypt);
             Send(packet);
-
-            PacketCrypt.Decrypt(packet, 6, packet.Length - 6, mCrypt);
-            Log.PacketLog(packet, 0, packet.Length);
         }
         private void Send(byte[] pBuffer)
         {
@@ -62,7 +59,6 @@ namespace MatchServer.Core
         private void HandleAsyncSend(object pObject, SocketAsyncEventArgs pArgs)
         {
             pArgs.Completed -= HandleAsyncSend;
-            Log.Write("[{0}] Sending Complete.", mClientIP);
         }
 
         private void HandleReceive(IAsyncResult pResult)
