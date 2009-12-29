@@ -172,7 +172,21 @@ namespace MatchServer.Packet.Handle
             pResponseSelectChar.Write(1, 1);
             pResponseSelectChar.Write((byte)0x3E);
             pClient.Send(pResponseSelectChar);
+
+            pClient.mClientFlags = PacketFlags.Character;
         }
 
+        [PacketHandler(Operation.MatchRequestRecommendedChannel, PacketFlags.Character)]
+        public static void ProcessRequestRecommendChannel (Client pClient, PacketReader pPacket)
+        {
+            MMatchChannel channel = null;
+            channel = Program.mChannels.Find(c => c.nMaxUsers > c.lClients.Count && c.nMinLevel < pClient.mCharacter.nLevel && c.nMaxLevel > pClient.mCharacter.nLevel);
+            if (channel == null)
+                channel = Program.mChannels[0];
+            
+            PacketWriter pResponseRecommendChannel = new PacketWriter(Operation.MatchResponseRecommendedChannel, CryptFlags.Encrypt);
+            pResponseRecommendChannel.Write(channel.uidChannel);
+            pClient.Send(pResponseRecommendChannel);
+        }
     }
 }
