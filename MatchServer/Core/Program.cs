@@ -56,6 +56,7 @@ namespace MatchServer.Core
                         item.nLevel = (byte)Int32.Parse(reader.GetAttribute("res_level"));
                         item.nWeight = Int32.Parse(reader.GetAttribute("weight"));
                         item.nMaxWT = reader.GetAttribute("maxwt") == null ? 0 : Int32.Parse(reader.GetAttribute("maxwt"));
+                        item.nPrice = reader.GetAttribute("bt_price") == null ? 0 : Int32.Parse(reader.GetAttribute("bt_price"));
                         mItems.Add(item);
                         break;
                 }
