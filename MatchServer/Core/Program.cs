@@ -17,6 +17,7 @@ namespace MatchServer.Core
         public static List<Item> mItems;
         public static List<UInt32> mShop;
         public static List<MMatchChannel> mChannels;
+        public static List<Client> mAgents;
 
         public static System.Text.RegularExpressions.Regex mRegex = new System.Text.RegularExpressions.Regex("[a-zA-Z0-9]{3,16}");
         static void Main(string[] args)
@@ -24,10 +25,12 @@ namespace MatchServer.Core
             mItems = new List<Item>();
             mShop = new List<uint>();
             mChannels = new List<MMatchChannel>();
-                
+            mAgents = new List<Client>();
+
             Console.WindowWidth = Console.BufferWidth = 120;
             Console.Title = "Match Server";
             Database.Initialize();
+            PacketMgr.InitializeHandlers<Agent>();
             PacketMgr.InitializeHandlers<Match>();
             PacketMgr.InitializeHandlers<Channel>();
             LoadItems();

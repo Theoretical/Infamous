@@ -53,6 +53,7 @@
     <Compile Include="Manager\ChannelMgr.cs" />
     <Compile Include="Network\TCPServer.cs" />
     <Compile Include="Packet\HandlerDelegate.cs" />
+    <Compile Include="Packet\Handle\Agent.cs" />
     <Compile Include="Packet\Handle\Channel.cs" />
     <Compile Include="Packet\Handle\Match.cs" />
     <Compile Include="Packet\PacketCrypt.cs" />

@@ -13,7 +13,8 @@ namespace MatchServer.Core
              
         private Socket mSocket = null;
         public UInt64 mClientUID = 0;
-        private string mClientIP = String.Empty;
+        public bool mIsAgent = false;
+        public string mClientIP = String.Empty;
         private byte[] mStream = new byte[0];
         private byte[] mBuffer = new byte[4096];
         private byte[] mCrypt = new byte[32];
@@ -183,7 +184,8 @@ namespace MatchServer.Core
                 lock (mPacketQueue)
                     pReader = mPacketQueue.Dequeue();
 
-                Log.Write("{0} Received: {1}", mClientIP, pReader.getOpcode());
+                if (pReader.getOpcode() != Operation.MatchAgentRequestLiveCheck)
+                    Log.Write("[{0}] Received: {1}", mClientIP, pReader.getOpcode());
                 if (PacketMgr.mOpcodes.TryGetValue(pReader.getOpcode(), out handler))
                     if (mClientFlags >= handler.mFlags) 
                         try
@@ -230,11 +232,10 @@ namespace MatchServer.Core
 
             //Our actual packet
             Buffer.BlockCopy(BitConverter.GetBytes((Int16)10), 0, bHandshake, 0, 2);
-            Buffer.BlockCopy(BitConverter.GetBytes((Int16)26), 0, bHandshake, 2, 2);
-            Buffer.BlockCopy(BitConverter.GetBytes((Int16)20), 0, bHandshake, 6, 2);
+            Buffer.BlockCopy(BitConverter.GetBytes((Int32)26), 0, bHandshake, 2, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes((Int32)0), 0, bHandshake, 6, 4);
             Buffer.BlockCopy(mCrypt, 4, bHandshake, 10, 12);
             Buffer.BlockCopy(mCrypt, 0, bHandshake, 22, 4);
-            Buffer.BlockCopy(BitConverter.GetBytes(PacketCrypt.CalculateChecksum(bHandshake, 0, 26)), 0, bHandshake, 4, 2);
 
             for (int i = 0; i < 4; ++i)
             {
@@ -242,7 +243,6 @@ namespace MatchServer.Core
                 uint b = BitConverter.ToUInt32(mCrypt, i * 4);
                 Buffer.BlockCopy(BitConverter.GetBytes(a ^ b), 0, mCrypt, i * 4, 4);
             }
-
             Send(bHandshake);
         }
 

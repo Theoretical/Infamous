@@ -371,9 +371,14 @@ namespace MatchServer.Core
         BridgeRequest = 1006,
         BridgeResponse = 1007,
         CRCRequest = 0x2af9,
-        MatchRegisterAgent = 0x139D,//0x1389,
         AgentError = 0x1395,
-        AgentRelayPeer = 0x13C6
+        AgentRelayPeer = 0x13C6,
+
+        MatchRegisterAgent = 0x1389,
+        MatchUnregisterAgent = 0x138A,
+        MatchAgentRequestLiveCheck = 0x1393,
+        MatchAgentResponseLiveCheck = 0x1394
+
     }
 
 }
