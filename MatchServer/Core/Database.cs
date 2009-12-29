@@ -62,6 +62,19 @@ namespace MatchServer.Core
             }
         }
 
+        public static int GetIdentity(string szQuery)
+        {
+            lock (m_sqlConnection)
+            {
+                using (SqlCommand sqlCMD = new SqlCommand(szQuery, m_sqlConnection))
+                    using (SqlDataReader sqlDR = sqlCMD.ExecuteReader())
+                    {
+                        sqlDR.Read();
+                        return Convert.ToInt32(sqlDR[0]);
+                    }
+            }
+        }
+
         public static void GetAccount(string szUser, string szPassword, ref MMatchAccountInfo accountInfo)
         {
             if (accountInfo == null)
