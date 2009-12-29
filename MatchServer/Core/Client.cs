@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Net.Sockets;
 
+using MatchServer.Manager;
 using MatchServer.Network;
 using MatchServer.Packet;
 namespace MatchServer.Core
@@ -40,10 +41,13 @@ namespace MatchServer.Core
 
         public void UnloadCharacter()
         {
+            if (mChannel != null)
+                ChannelMgr.Leave(this);
             mClientFlags = PacketFlags.Login;
             mPlace = MMatchPlace.Outside;
             mCharacter = new MTD_CharInfo();
         }
+
         public void Send(PacketWriter pPacket)
         {
             var packet = pPacket.Process(++mCounter, mCrypt);
@@ -54,6 +58,7 @@ namespace MatchServer.Core
             }
             else Send(packet);
         }
+
         private void Send(byte[] pBuffer)
         {
             mArgs.Completed += HandleAsyncSend;
@@ -69,10 +74,7 @@ namespace MatchServer.Core
             lock (mSendQueue)
             {
                 if (mSendQueue.Count > 0)
-                {
-                    Log.Write("Sending: {0}", mSendQueue.Count);
                     Send(mSendQueue.Dequeue());
-                }
                 else mSending = false;
             }
         }
@@ -91,6 +93,7 @@ namespace MatchServer.Core
                 Log.Write("[{0}] Client Disconnected.", mClientIP);
                 return;
             }
+
 
             if (nTotalRecv < 1)
             {
@@ -183,7 +186,16 @@ namespace MatchServer.Core
                 Log.Write("{0} Received: {1}", mClientIP, pReader.getOpcode());
                 if (PacketMgr.mOpcodes.TryGetValue(pReader.getOpcode(), out handler))
                     if (mClientFlags >= handler.mFlags) 
-                        handler.mProcessor(this, pReader);
+                        try
+                        {
+                            handler.mProcessor(this, pReader);
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Write(e.Message);
+                            Disconnect();
+                            return;
+                        }
             }
         }
 
