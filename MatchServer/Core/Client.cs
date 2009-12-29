@@ -17,8 +17,10 @@ namespace MatchServer.Core
         private byte[] mBuffer = new byte[4096];
         private byte[] mCrypt = new byte[32];
         private byte mCounter = 0;
+        private bool mSending = false;
         private SocketAsyncEventArgs mArgs = new SocketAsyncEventArgs();
         private Queue<PacketReader> mPacketQueue = new Queue<PacketReader>();
+        private Queue<byte[]> mSendQueue = new Queue<byte[]>();
         public PacketFlags mClientFlags = PacketFlags.None;
         
         public MMatchAccountInfo mAccount = new MMatchAccountInfo();
@@ -27,8 +29,7 @@ namespace MatchServer.Core
         public MMatchStage mStage = null;
         public MGame mGame = null;
         public MMatchPlace mPlace = MMatchPlace.Outside;
-
-
+        public Int32 mChannelPage = 0;
         public void Disconnect()
         {
             if (mSocket.Connected)
@@ -46,19 +47,34 @@ namespace MatchServer.Core
         public void Send(PacketWriter pPacket)
         {
             var packet = pPacket.Process(++mCounter, mCrypt);
-            Send(packet);
+            if (mSending) 
+            {
+                lock (mSendQueue)
+                    mSendQueue.Enqueue(packet);
+            }
+            else Send(packet);
         }
         private void Send(byte[] pBuffer)
         {
             mArgs.Completed += HandleAsyncSend;
             mArgs.SetBuffer(pBuffer, 0, pBuffer.Length);
             mArgs.UserToken = this;
+            mSending = true;
             mSocket.SendAsync(mArgs);
         }
 
         private void HandleAsyncSend(object pObject, SocketAsyncEventArgs pArgs)
         {
             pArgs.Completed -= HandleAsyncSend;
+            lock (mSendQueue)
+            {
+                if (mSendQueue.Count > 0)
+                {
+                    Log.Write("Sending: {0}", mSendQueue.Count);
+                    Send(mSendQueue.Dequeue());
+                }
+                else mSending = false;
+            }
         }
 
         private void HandleReceive(IAsyncResult pResult)
