@@ -65,6 +65,8 @@ namespace MatchServer.Packet.Handle
         [PacketHandler(Operation.MatchRequestAccountCharList, PacketFlags.Login)]
         public static void ProcessCharacters(Client pClient, PacketReader pPacket)
         {
+            pClient.UnloadCharacter();
+
             PacketWriter pResponseChars = new PacketWriter(Operation.MatchResponseAccountCharList, CryptFlags.Encrypt);
             var charCount = Database.GetQuery(string.Format("SELECT COUNT(*) FROM Character WHERE AID={0}", pClient.mAccount.nAID));
             pResponseChars.Write(charCount, 34);
@@ -188,5 +190,157 @@ namespace MatchServer.Packet.Handle
             pResponseRecommendChannel.Write(channel.uidChannel);
             pClient.Send(pResponseRecommendChannel);
         }
+
+        [PacketHandler(Operation.MatchRequestShopItemList, PacketFlags.Character)]
+        public static void ProcessShopItemList (Client pClient, PacketReader pPacket)
+        {
+            PacketWriter pResponseShop = new PacketWriter(Operation.MatchResponseShopItemList, CryptFlags.Decrypt);
+            pResponseShop.Write(1, 12);
+            pResponseShop.WriteSkip(12);
+
+            pResponseShop.Write(Program.mShop.Count, 4);
+            foreach (uint item in Program.mShop)
+                pResponseShop.Write(item);
+
+            pClient.Send(pResponseShop);
+
+        }
+
+        [PacketHandler(Operation.MatchRequestCharacterItemList, PacketFlags.Character)]
+        public static void ProcessCharItemList (Client pClient, PacketReader pPacket)
+        {
+            PacketWriter pResponseCharItems = new PacketWriter(Operation.MatchResponseCharacterItemList, CryptFlags.Decrypt);
+            pResponseCharItems.Write(pClient.mCharacter.nBP);
+
+            pResponseCharItems.Write(12, 8);
+            for (int i = 0; i < 12; ++i)
+            {
+                pResponseCharItems.Write((Int32)0);
+                pResponseCharItems.Write(pClient.mCharacter.nEquippedItems[i].nItemCID);
+            }
+
+            pResponseCharItems.Write(pClient.mCharacter.nItems.Count, 16);
+            foreach (Item i in pClient.mCharacter.nItems)
+            {
+                pResponseCharItems.Write((Int32)0);
+                pResponseCharItems.Write(i.nItemCID);
+                pResponseCharItems.Write(i.nItemID);
+                pResponseCharItems.Write(i.nRentHour);
+            }
+            pResponseCharItems.Write(0, 12);
+            pClient.Send(pResponseCharItems);
+        }
+
+        [PacketHandler(Operation.MatchRequestBuyItem, PacketFlags.Character)]
+        public static void ProcessBuyItem(Client pClient, PacketReader pPacket)
+        {
+            var uid = pPacket.ReadUInt64();
+            var itemid = pPacket.ReadInt32();
+            Item item = null;
+            var result = Results.Accepted;
+
+            item = Program.mItems.Find(i => i.nItemID == itemid);
+            if (item == null)
+                result = Results.ShopItemNonExistant;
+            else if (item.nPrice > pClient.mCharacter.nBP)
+                result = Results.ShopInsufficientBounty;
+            else
+            {
+                Item temp = new Item();
+                temp.nItemID = item.nItemID;
+                temp.nLevel = item.nLevel;
+                temp.nMaxWT = item.nMaxWT;
+                temp.nWeight = item.nWeight;
+                temp.nPrice = item.nPrice;
+                Database.Execute(string.Format("INSERT INTO CharacterItem (CID,ItemID,RegDate) VALUES ({0},{1},GetDate())", pClient.mCharacter.nCID, item.nItemID));
+                temp.nItemCID = Database.GetIdentity(string.Format("select @@identity"));
+                pClient.mCharacter.nItems.Add(temp);
+
+                pClient.mCharacter.nBP -= item.nPrice;
+                Database.Execute(string.Format("UPDATE Character SET BP={0} WHERE CID={1}", pClient.mCharacter.nBP, pClient.mCharacter.nCID));
+            }
+
+            PacketWriter pResponseBuyItem = new PacketWriter(Operation.MatchResponseBuyItem, CryptFlags.Decrypt);
+            pResponseBuyItem.Write((Int32)result);
+            pClient.Send(pResponseBuyItem);
+        }
+
+        [PacketHandler(Operation.MatchRequestSellItem, PacketFlags.Character)]
+        public static void ProcessSellItem (Client pClient, PacketReader pPacket)
+        {
+            var uidChar = pPacket.ReadUInt64();
+            var low = pPacket.ReadInt32();
+            var high = pPacket.ReadInt32();
+            var result = Results.Accepted;
+
+            var item = pClient.mCharacter.nItems.Find (i => i.nItemCID == high);
+            if (item == null)
+                result = Results.ShopItemNonExistant;
+            else
+            {
+                Database.Execute(string.Format("DELETE FROM CharacterItem WHERE CIID={0}", item.nItemCID));
+                pClient.mCharacter.nBP += item.nPrice;
+                Database.Execute(string.Format("UPDATE Character SET BP={0} WHERE CID={1}", pClient.mCharacter.nBP, pClient.mCharacter.nCID));
+                pClient.mCharacter.nItems.Remove(item);
+            }
+
+            PacketWriter pResponseSellItem = new PacketWriter(Operation.MatchResponseSellItem, CryptFlags.Decrypt);
+            pResponseSellItem.Write((Int32)result);
+            pClient.Send(pResponseSellItem);
+        }
+
+        [PacketHandler(Operation.MatchRequestEquipItem, PacketFlags.Character)]
+        public static void ProcessEquipItem(Client pClient, PacketReader pPacket)
+        {
+            var uidChar = pPacket.ReadUInt64();
+            var nItemLow = pPacket.ReadInt32();
+            var nItemHigh = pPacket.ReadInt32();
+            var nItemSlot = pPacket.ReadInt32();
+            Results result = Results.Accepted;
+
+            if (!Enum.IsDefined(typeof(MMatchItemSlotType), nItemSlot))
+            {
+                pClient.Disconnect();
+                return;
+            }
+
+            Item nItem = pClient.mCharacter.nItems.Find(i => i.nItemCID == nItemHigh);
+            if (nItem == null)
+                result = Results.ShopItemNonExistant;
+            else
+            {
+                pClient.mCharacter.nEquippedItems[nItemSlot].nItemCID = nItemHigh;
+                pClient.mCharacter.nEquippedItems[nItemSlot].nItemID = nItem.nItemID;
+                Database.Execute(string.Format("UPDATE Character SET {0}={1} WHERE CID={2}", (MMatchItemSlotType)nItemSlot, nItemHigh, pClient.mCharacter.nCID));
+            }
+            PacketWriter pResponseEquipItem = new PacketWriter(Operation.MatchResponseEquipItem, CryptFlags.Decrypt);
+            pResponseEquipItem.Write((Int32)result);
+            pClient.Send(pResponseEquipItem);
+
+            ProcessCharItemList(pClient, pPacket);
+        }
+
+        [PacketHandler(Operation.MatchRequestTakeOffItem, PacketFlags.Character)]
+        public static void ProcessTakeOffItem(Client pClient, PacketReader pPacket)
+        {
+            var uidChar = pPacket.ReadUInt64();
+            var nItemSlot = pPacket.ReadInt32();
+
+            if (!Enum.IsDefined(typeof(MMatchItemSlotType), nItemSlot))
+            {
+                pClient.Disconnect();
+                return;
+            }
+            pClient.mCharacter.nEquippedItems[nItemSlot].nItemCID = 0;
+            pClient.mCharacter.nEquippedItems[nItemSlot].nItemID = 0;
+            Database.Execute(string.Format("UPDATE Character SET {0}={1} WHERE CID={2}", (MMatchItemSlotType)nItemSlot, 0, pClient.mCharacter.nCID));
+
+            PacketWriter pResponseTakeOffItem = new PacketWriter(Operation.MatchResponseTakeOffItem, CryptFlags.Decrypt);
+            pResponseTakeOffItem.Write((Int32)0);
+            pClient.Send(pResponseTakeOffItem);
+
+            ProcessCharItemList(pClient, null);
+        }
+
     }
 }
