@@ -40,5 +40,21 @@ namespace MatchServer.Packet.Handle
             pClient.mChannelPage = page;
             ChannelMgr.PlayerList(pClient);
         }
+
+        [PacketHandler(Operation.ChannelRequestChat, PacketFlags.Character)]
+        public static void ResponseChannelChat (Client pClient, PacketReader pPacket)
+        {
+            var uidChar = pPacket.ReadUInt64();
+            var uidChan = pPacket.ReadUInt64();
+            var message = pPacket.ReadString();
+
+            if (uidChar != pClient.mClientUID || uidChan != pClient.mChannel.uidChannel || message.Length > 127)
+            {
+                pClient.Disconnect();
+                return;
+            }
+
+            ChannelMgr.Chat(pClient, message);
+        }
     }
 }

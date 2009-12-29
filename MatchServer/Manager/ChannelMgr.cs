@@ -73,5 +73,17 @@ namespace MatchServer.Manager
             }
             pClient.Send(pResonsePlayerList);
         }
+
+        public static void Chat (Client pClient, string pMessage)
+        {
+            PacketWriter pChannelChat = new PacketWriter(Operation.ChannelChat, CryptFlags.Encrypt);
+            
+            pChannelChat.Write(pClient.mChannel.uidChannel);
+            pChannelChat.Write(pClient.mCharacter.szName);
+            pChannelChat.Write(pMessage);
+            pChannelChat.Write((Int32)pClient.mAccount.nUGradeID);
+            foreach (Client c in pClient.mChannel.lClients)
+                c.Send(pChannelChat);
+        }
     }
 }
