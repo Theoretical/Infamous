@@ -50,7 +50,6 @@ namespace MatchServer.Packet
                 if (mOpcodes.ContainsKey(attribute.Opcode))
                     continue;
                 mOpcodes.Add(attribute.Opcode, new HandlerDelegate(new HandlerDelegate.PacketProcessor((Action<Client, PacketReader>)Delegate.CreateDelegate(typeof(Action<Client,PacketReader>), method)), attribute.Flag));
-                Log.Write("Registered Opcode: {0} to method: {1}", attribute.Opcode, method.Name);
             }
         }
     }
