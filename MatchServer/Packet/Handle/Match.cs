@@ -93,7 +93,7 @@ namespace MatchServer.Packet.Handle
             pClient.Send(pCharInfoResponse);
         }
 
-        [PacketHandler(Operation.MatchRequestCreateChar, PacketFlags.Login)]
+        [PacketHandler(Operation.MatchRequestCreateChar , PacketFlags.Login)]
         public static void ProcessCreateChar (Client pClient, PacketReader pPacket)
         {
             var uid = pPacket.ReadUInt64();
@@ -125,5 +125,54 @@ namespace MatchServer.Packet.Handle
             pResponseCreateChar.Write(name);
             pClient.Send(pResponseCreateChar);
         }
+
+        [PacketHandler(Operation.MatchRequestDeleteChar, PacketFlags.Login)]
+        public static void ProcessDeleteChar (Client pClient, PacketReader pPacket)
+        {
+            var uid = pPacket.ReadUInt64();
+            var index = pPacket.ReadInt32();
+            var name = pPacket.ReadString();
+            var result = Results.Accepted;
+
+            if (uid != pClient.mClientUID || !Program.mRegex.IsMatch(name) || index < 0 || index > 4)
+            {
+                pClient.Disconnect();
+                return;
+            }
+
+            var cid = Database.GetQuery(string.Format("SELECT CID FROM Character WHERE CharNum={0} AND AID={1}", index, pClient.mAccount.nAID));
+            if (cid == 0) result = Results.CharacterDeleteDisabled;
+            else
+            {
+                Database.Execute("DELETE FROM CharacterItem WHERE CID=" + cid);
+                Database.Execute("DELETE FROM Character WHERE CID=" + cid);
+                Database.UpdateIndexes(pClient.mAccount.nAID);
+            }
+
+            PacketWriter pResponseDeleteChar = new PacketWriter(Operation.MatchResponseDeleteChar, CryptFlags.Encrypt);
+            pResponseDeleteChar.Write((Int32)result);
+            pClient.Send(pResponseDeleteChar);
+        }
+
+        [PacketHandler(Operation.MatchRequestSelectChar, PacketFlags.Login)]
+        public static void ProcessSelectChar (Client pClient, PacketReader pPacket)
+        {
+            var uid = pPacket.ReadUInt64();
+            var index = pPacket.ReadInt32();
+
+            if (uid != pClient.mClientUID || index < 0 || index > 4)
+            {
+                pClient.Disconnect();
+                return;
+            }
+
+            PacketWriter pResponseSelectChar = new PacketWriter(Operation.MatchResponseSelectChar, CryptFlags.Encrypt);
+            pResponseSelectChar.Write((Int32)0);
+            pResponseSelectChar.Write(pClient.mCharacter);
+            pResponseSelectChar.Write(1, 1);
+            pResponseSelectChar.Write((byte)0x3E);
+            pClient.Send(pResponseSelectChar);
+        }
+
     }
 }
