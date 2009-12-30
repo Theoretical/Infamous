@@ -13,7 +13,7 @@ namespace MatchServer.Packet.Handle
         public static void ProcessRegisterAgent (Client pClient, PacketReader pPacket)
         {
             pClient.mIsAgent = true;
-            Log.Write("[{0}] Agent Registed.", pClient.mClientIP);
+            Log.Write("[{0}] Agent Registered.", pClient.mClientIP);
             lock (Program.mAgents)
                 Program.mAgents.Add(pClient);
         }

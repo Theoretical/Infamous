@@ -50,12 +50,17 @@
     <Compile Include="Core\Log.cs" />
     <Compile Include="Core\Program.cs" />
     <Compile Include="Core\Structures.cs" />
+    <Compile Include="Manager\Battle\Deathmatch.cs" />
     <Compile Include="Manager\ChannelMgr.cs" />
+    <Compile Include="Manager\StageMgr.cs" />
     <Compile Include="Network\TCPServer.cs" />
+    <Compile Include="Network\UDPServer.cs" />
     <Compile Include="Packet\HandlerDelegate.cs" />
     <Compile Include="Packet\Handle\Agent.cs" />
+    <Compile Include="Packet\Handle\Battle.cs" />
     <Compile Include="Packet\Handle\Channel.cs" />
     <Compile Include="Packet\Handle\Match.cs" />
+    <Compile Include="Packet\Handle\Stage.cs" />
     <Compile Include="Packet\PacketCrypt.cs" />
     <Compile Include="Packet\PacketMgr.cs" />
     <Compile Include="Packet\PacketReader.cs" />

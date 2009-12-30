@@ -30,5 +30,19 @@ namespace MatchServer.Packet
             var pString = Encoding.GetEncoding(1252).GetString(buffer);
             return pString.Substring(0, pString.IndexOf('\0'));
         }
+
+        public string ReadString (int len)
+        {
+            var buffer = new byte[len];
+            var pString = "";
+            var i = 0;
+
+            base.Read(buffer, 0, len);
+            for (; i < len; ++i)
+                if (buffer[i] == 0)
+                    break;
+            pString = Encoding.GetEncoding(1252).GetString(buffer, 0, i);
+            return pString;
+        }
     }
 }

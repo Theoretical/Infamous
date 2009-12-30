@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Net;
 using System.Net.Sockets;
 
 using MatchServer.Manager;
@@ -14,12 +15,14 @@ namespace MatchServer.Core
         private Socket mSocket = null;
         public UInt64 mClientUID = 0;
         public bool mIsAgent = false;
+        public IPEndPoint mPeerEnd = null;
         public string mClientIP = String.Empty;
         private byte[] mStream = new byte[0];
         private byte[] mBuffer = new byte[4096];
         private byte[] mCrypt = new byte[32];
         private byte mCounter = 0;
         private bool mSending = false;
+        public byte mStageIndex = 0; 
         private SocketAsyncEventArgs mArgs = new SocketAsyncEventArgs();
         private Queue<PacketReader> mPacketQueue = new Queue<PacketReader>();
         private Queue<byte[]> mSendQueue = new Queue<byte[]>();
@@ -29,11 +32,18 @@ namespace MatchServer.Core
         public MTD_CharInfo mCharacter = new MTD_CharInfo();
         public MMatchChannel mChannel = null;
         public MMatchStage mStage = null;
-        public MGame mGame = null;
+        public MMatchTeam mTeam = MMatchTeam.Red;
+        public MMatchObjectStageState mState = MMatchObjectStageState.NonReady;
+        public MGame mGame = new MGame();
         public MMatchPlace mPlace = MMatchPlace.Outside;
         public Int32 mChannelPage = 0;
         public void Disconnect()
         {
+            if (mChannel != null)
+                ChannelMgr.Leave(this);
+            if (mStage != null)
+                StageMgr.ForceLeave(this);
+
             if (mSocket.Connected)
                 mSocket.Close();
 
@@ -194,7 +204,7 @@ namespace MatchServer.Core
                         }
                         catch (Exception e)
                         {
-                            Log.Write(e.Message);
+                            Log.Write("!!! ERRROR: {0} !!!!!!!!!", e.Message);
                             Disconnect();
                             return;
                         }

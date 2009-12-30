@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using MatchServer.Network;
 using MatchServer.Packet;
 using MatchServer.Packet.Handle;
-namespace MatchServer.Core
+namespace MatchServer.Core  
 {
     class Program
     {
@@ -18,6 +18,7 @@ namespace MatchServer.Core
         public static List<UInt32> mShop;
         public static List<MMatchChannel> mChannels;
         public static List<Client> mAgents;
+        public static UInt64 mStageCounter = 1;
 
         public static System.Text.RegularExpressions.Regex mRegex = new System.Text.RegularExpressions.Regex("[a-zA-Z0-9]{3,16}");
         static void Main(string[] args)
@@ -33,9 +34,12 @@ namespace MatchServer.Core
             PacketMgr.InitializeHandlers<Agent>();
             PacketMgr.InitializeHandlers<Match>();
             PacketMgr.InitializeHandlers<Channel>();
+            PacketMgr.InitializeHandlers<Stage>();
+            PacketMgr.InitializeHandlers<Battle>();
             LoadItems();
             LoadChannels();
             TCPServer.Initialize();
+            UDPServer.Initialize();
 
             Log.Write("Loaded: {0} channels.", mChannels.Count);
             Log.Write("Loaded: {0} items.", mItems.Count);

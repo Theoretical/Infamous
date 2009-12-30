@@ -8,7 +8,7 @@ namespace MatchServer.Network
 {
     class TCPServer
     {
-        private static HashSet<Client> mClients = new HashSet<Client>();
+        public static List<Client> mClients = new List<Client>();
         private static UInt64 mSessions = 0;
         private static Socket mListener;
 
@@ -39,7 +39,7 @@ namespace MatchServer.Network
                 mListener.Bind(new IPEndPoint(IPAddress.Any, 6000));
                 mListener.Listen(64);
                 mSessions = 1;
-                mClients = new HashSet<Client>();
+                mClients = new List<Client>();
                 mListener.BeginAccept(new AsyncCallback(HandleAccept), null);
                 Log.Write("TCP Server Iniitialized.");
             }

@@ -134,7 +134,7 @@ namespace MatchServer.Core
         TeamDeathMatchExtreme,
         Duel
     }
-    public enum MMatchTeam
+    public enum MMatchTeam : int
     {
         All,
         Spectator,

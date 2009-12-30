@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using MatchServer.Manager.Battle;
 namespace MatchServer.Core
 {
     class EXP
@@ -80,7 +80,7 @@ namespace MatchServer.Core
         public string szMap = "Mansion";
         public MMatachStageState nStageState = MMatachStageState.Standby;
         public MMatchRoundState nRoundState = MMatchRoundState.Prepare;
-        public MMatchObjectStageGameType nGameType = MMatchObjectStageGameType.Berserker;
+        public MMatchObjectStageGameType nGameType = MMatchObjectStageGameType.DeathMatch;
         public byte nMaxPlayers = 8;
         public bool bTeamKill = false;
         public bool bTeamWinThePoint = false;
@@ -97,6 +97,7 @@ namespace MatchServer.Core
         public List<Client> Clients = new List<Client>();
         public List<MMatchWorldItemSpawnInfo> Items = new List<MMatchWorldItemSpawnInfo>();
         public Int32 nItemCount = 0;
+        public IGame BattleMgr = new Deathmatch();
     }
     class MMatchFriendNode
     {

@@ -15,7 +15,7 @@ namespace MatchServer.Manager
 
             pClient.mPlace = MMatchPlace.Lobby;
             pClient.mChannel = pChannel;
-
+                
             PacketWriter pPacket = new PacketWriter(Operation.ChannelResponseJoin, CryptFlags.Encrypt);
             pPacket.Write(pChannel.uidChannel);
             pPacket.Write((Int32)pChannel.nChannelType);
@@ -25,13 +25,15 @@ namespace MatchServer.Manager
 
             pPacket = new PacketWriter(Operation.MatchResponseRuleset, CryptFlags.Encrypt);
             pPacket.Write(pChannel.uidChannel);
-            pPacket.Write(pChannel.nChannelRule.ToString());
+            pPacket.Write(pChannel.nChannelRule.ToString().ToLower());
             pClient.Send(pPacket);
 
             foreach (Client c in pChannel.lClients)
             {
                 PlayerList(c);
             }
+
+
         }
         public static void Leave(Client pClient)
         {
